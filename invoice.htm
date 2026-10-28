@@ -7,102 +7,99 @@
 <title>廠商發票登錄</title>
 
 <style>
-* {
-    box-sizing: border-box;
-}
+    * {
+        box-sizing: border-box;
+    }
 
-body {
-    font-family: Arial, "Microsoft JhengHei", sans-serif;
-    background: #f4f6f9;
-    margin: 0;
-    padding: 30px 15px;
-    color: #333;
-}
+    body {
+        font-family: Arial, "Microsoft JhengHei", sans-serif;
+        background: #f4f6f9;
+        margin: 0;
+        padding: 30px 15px;
+        color: #333;
+    }
 
-.container {
-    max-width: 500px;
-    margin: 0 auto;
-    background: #fff;
-    padding: 30px;
-    border-radius: 12px;
-    box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
-}
+    .container {
+        max-width: 500px;
+        margin: 0 auto;
+        background: #fff;
+        padding: 30px;
+        border-radius: 12px;
+        box-shadow: 0 4px 18px rgba(0, 0, 0, 0.08);
+    }
 
-h2 {
-    text-align: center;
-    margin-top: 0;
-    margin-bottom: 25px;
-    color: #2c3e50;
-}
+    h2 {
+        text-align: center;
+        margin-top: 0;
+        margin-bottom: 25px;
+        color: #2c3e50;
+    }
 
-.form-group {
-    margin-bottom: 18px;
-}
+    .form-group {
+        margin-bottom: 18px;
+    }
 
-label {
-    display: block;
-    margin-bottom: 7px;
-    font-weight: bold;
-}
+    label {
+        display: block;
+        margin-bottom: 7px;
+        font-weight: bold;
+    }
 
-input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ccd2d8;
-    border-radius: 6px;
-    font-size: 16px;
-    outline: none;
-}
+    input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ccd2d8;
+        border-radius: 6px;
+        font-size: 16px;
+        outline: none;
+    }
 
-input:focus {
-    border-color: #2878d0;
-    box-shadow: 0 0 0 2px rgba(40, 120, 208, 0.12);
-}
+    input:focus {
+        border-color: #2878d0;
+        box-shadow: 0 0 0 2px rgba(40, 120, 208, 0.12);
+    }
 
-button {
-    width: 100%;
-    padding: 13px;
-    background: #2878d0;
-    color: white;
-    border: none;
-    border-radius: 6px;
-    font-size: 17px;
-    cursor: pointer;
-}
+    button {
+        width: 100%;
+        padding: 13px;
+        background: #2878d0;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        font-size: 17px;
+        cursor: pointer;
+    }
 
-button:hover {
-    background: #1d62ad;
-}
+    button:hover {
+        background: #1d62ad;
+    }
 
-button:disabled {
-    background: #9aa8b5;
-    cursor: wait;
-}
+    button:disabled {
+        background: #9aa8b5;
+        cursor: wait;
+    }
 
-#resultBox {
-    display: none;
-    margin-top: 24px;
-}
+    #result {
+        display: none;
+        margin-top: 22px;
+        padding: 15px;
+        border-radius: 6px;
+        background: #f1f5f9;
+        border: 1px solid #dce3ea;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+        line-height: 1.6;
+    }
 
-#resultBox h3 {
-    color: #2c3e50;
-    font-size: 18px;
-}
+    #result.error {
+        color: #b42318;
+        background: #fff1f0;
+        border-color: #f5c2c0;
+    }
 
-#resultFrame {
-    width: 100%;
-    height: 250px;
-    border: 1px solid #dce3ea;
-    border-radius: 6px;
-    background: #fff;
-}
-
-#status {
-    margin-top: 15px;
-    font-size: 14px;
-    color: #666;
-    text-align: center;
-}
+    #result.success {
+        color: #216e39;
+    }
 </style>
 </head>
 
@@ -111,12 +108,7 @@ button:disabled {
 <div class="container">
     <h2>廠商發票登錄</h2>
 
-    <form
-        id="invoiceForm"
-        action="http://airrex.tw:2918/airrex/amber/invoice.pl"
-        method="POST"
-        target="resultFrame">
-
+    <form id="invoiceForm">
         <div class="form-group">
             <label for="invoice_no">發票號碼</label>
             <input
@@ -134,7 +126,7 @@ button:disabled {
                 type="text"
                 id="tax_id"
                 name="tax_id"
-                placeholder="請輸入 8 位統一編號"
+                placeholder="請輸入統一編號"
                 inputmode="numeric"
                 pattern="[0-9]{8}"
                 maxlength="8"
@@ -162,52 +154,55 @@ button:disabled {
                 required>
         </div>
 
-        <button type="submit" id="submitBtn">
-            送出發票資料
-        </button>
+        <button type="submit" id="submitBtn">送出發票資料</button>
     </form>
 
-    <div id="status" role="status" aria-live="polite"></div>
-
-    <div id="resultBox">
-        <h3>伺服器回傳結果</h3>
-
-        <iframe
-            id="resultFrame"
-            name="resultFrame"
-            title="伺服器回傳結果">
-        </iframe>
-    </div>
+    <div id="result" role="status" aria-live="polite"></div>
 </div>
 
 <script>
+const API_URL = "https://air-rex.com.tw/Myjob/proxy.php";
+
 const form = document.getElementById("invoiceForm");
+const result = document.getElementById("result");
 const submitBtn = document.getElementById("submitBtn");
-const resultBox = document.getElementById("resultBox");
-const resultFrame = document.getElementById("resultFrame");
-const status = document.getElementById("status");
 
-let submitted = false;
+form.addEventListener("submit", async function (event) {
+    event.preventDefault();
 
-form.addEventListener("submit", function () {
-    submitted = true;
-
+    result.style.display = "block";
+    result.className = "";
+    result.textContent = "資料送出中，請稍候……";
     submitBtn.disabled = true;
-    submitBtn.textContent = "資料送出中...";
-    status.textContent = "正在傳送發票資料，請稍候...";
-    resultBox.style.display = "block";
-});
 
-resultFrame.addEventListener("load", function () {
-    if (!submitted) {
-        return;
+    try {
+        const formData = new FormData(form);
+
+        const response = await fetch(API_URL, {
+            method: "POST",
+            body: formData
+        });
+
+        const responseText = await response.text();
+
+        if (!response.ok) {
+            throw new Error(
+                "伺服器回應 HTTP " + response.status +
+                "\n" + responseText
+            );
+        }
+
+        result.className = "success";
+        result.textContent = responseText || "伺服器已回應，但沒有回傳內容。";
+
+    } catch (error) {
+        result.className = "error";
+        result.textContent =
+            "送出失敗：" + error.message +
+            "\n\n請確認伺服器網址、網路連線及跨來源存取設定。";
+    } finally {
+        submitBtn.disabled = false;
     }
-
-    submitted = false;
-
-    submitBtn.disabled = false;
-    submitBtn.textContent = "送出發票資料";
-    status.textContent = "伺服器已回應，請查看下方結果。";
 });
 </script>
 
